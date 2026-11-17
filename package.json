@@ -1,0 +1,23 @@
+{
+  "name": "impossible-remi",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "node server/dev.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tools/test-rules.mjs && node tools/test-layout.mjs && node tools/test-i18n.mjs && node tools/test-flow.mjs && node tools/test-engine.mjs && node tools/test-jwt.mjs && node tools/test-supabase.mjs && node tools/test-client.mjs && node tools/test-online-main.mjs && node tools/test-net.mjs && node tools/test-server.mjs"
+  },
+  "dependencies": {
+    "three": "^0.160.0",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

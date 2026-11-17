@@ -1,0 +1,139 @@
+:root{--bg:#120e0c;--glass:rgba(22,18,16,.82);--line:rgba(255,255,255,.14);--tx:#f3eee8;--mut:#a99d92;--gold:#ffc83d;--ok:#4cd07d;--bad:#ff6b6b;--r:14px;--hh:64px;--fh:62px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;user-select:none;-webkit-user-select:none}
+small{color:var(--mut);font-size:11px}
+/* ===== kerangka: header | area 3D (+log) | bar bawah ===== */
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;width:100vw}
+#topbar{flex:none;height:var(--hh);display:flex;align-items:center;gap:10px;padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));background:linear-gradient(#241b16,#171210);border-bottom:1px solid var(--line);z-index:20}
+#stage{flex:1;min-height:0;display:flex;position:relative}
+#view{flex:1;min-width:0;position:relative;background:radial-gradient(ellipse at center,#2a1f19,#0d0a09)}
+#view::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.5) 100%)}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block}
+#bottombar{flex:none;height:var(--fh);display:flex;align-items:center;gap:10px;padding:6px max(10px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:linear-gradient(#171210,#241b16);border-top:1px solid var(--line);z-index:20}
+/* ===== HUD pemain (header) ===== */
+#hud{flex:1;min-width:0;display:flex;gap:8px;visibility:hidden}
+.pl{--c:#888;flex:1 1 0;min-width:0;max-width:230px;display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);transition:background .3s,box-shadow .3s,border-color .3s}
+.pl.on{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 30%,transparent),rgba(255,255,255,.04));border-color:var(--c);box-shadow:0 0 14px -4px var(--c)}
+.pl.done{opacity:.8}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--c);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25);overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.pl.on .av{animation:bob 1.2s ease-in-out infinite}
+.pi{flex:1;min-width:0}
+.pn{display:flex;justify-content:space-between;gap:6px;font-weight:700;font-size:13px}
+.pn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pn b{color:var(--gold);font-variant-numeric:tabular-nums}
+.bar{height:5px;margin:3px 0 2px;border-radius:4px;background:rgba(255,255,255,.13);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--c),var(--gold));transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.rm{color:var(--ok);font-weight:800;font-size:11px}
+/* ===== toolbar ===== */
+#toolbar{flex:none;display:flex;gap:6px}
+#toolbar button{width:40px;height:40px;padding:0;border-radius:12px;font-size:17px;background:rgba(255,255,255,.07);border:1px solid var(--line);box-shadow:none;color:var(--tx);transition:opacity .2s,background .2s}
+#toolbar button:hover{background:rgba(255,255,255,.14);transform:none}
+#toolbar button.off{opacity:.4}
+#toolbar #langBtn,#toolbar #sizeBtn{width:auto;padding:0 10px;font-size:13px;font-weight:700}
+/* ===== bar bawah ===== */
+#status{flex:none;display:flex;gap:6px;visibility:hidden}
+.chip{padding:6px 11px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.chip.ph{background:var(--gold);color:#2a1d00;border-color:transparent}
+#msg{flex:1;min-width:0;padding:6px 12px;border-radius:12px;font-size:13px;line-height:1.35;text-align:center;background:rgba(255,255,255,.05);border:1px solid var(--line);max-height:100%;overflow:hidden;display:none}
+#msg.flash{animation:flash .5s ease-out}
+#actions{flex:none;display:flex;gap:8px}
+#actions button{padding:9px 16px;font-size:13px}
+#meldModeBtn,#doMeldBtn,#cancelEatBtn,#closeRoundBtn{display:none}
+#meldModeBtn{background:#3d6fb0}
+#doMeldBtn{background:var(--ok);color:#06240f;animation:pulse 1.4s infinite}
+#cancelEatBtn{background:#586a62}
+#closeRoundBtn{background:var(--bad);animation:pulse 1.4s infinite}
+/* ===== log (kolom samping, tidak menimpa meja) ===== */
+#log{width:250px;flex:none;display:none;flex-direction:column;background:#17110e;border-left:1px solid var(--line)}
+#log.open{display:flex}
+.lh{padding:9px 12px;font-weight:800;font-size:12px;color:var(--gold);border-bottom:1px solid var(--line)}
+#logList{flex:1;overflow-y:auto;padding:6px 10px;font-size:12px;line-height:1.45}
+.le{--c:#888;padding:2px 0 2px 8px;border-left:3px solid var(--c);margin:3px 0}
+.le b{color:var(--c)}
+.le.sys{color:var(--mut);border-left-color:transparent;font-style:italic}
+/* ===== tombol umum ===== */
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 22px;font-weight:700;font-size:15px;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .12s,filter .12s}
+button:hover{filter:brightness(1.12);transform:translateY(-1px)}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+/* ===== banner & skor melayang ===== */
+.banner{position:fixed;top:34%;left:50%;transform:translate(-50%,-50%);padding:10px 30px;border-radius:99px;font-size:28px;font-weight:800;background:var(--glass);border:2px solid var(--gold);color:var(--gold);pointer-events:none;z-index:50;animation:ban 1.3s forwards}
+.pop{position:fixed;transform:translate(-50%,-100%);font-size:26px;font-weight:900;color:var(--gold);-webkit-text-stroke:1px rgba(0,0,0,.6);text-shadow:0 3px 8px rgba(0,0,0,.7);pointer-events:none;z-index:60;animation:fl 1.5s ease-out forwards}
+.pop.neg{color:var(--bad)}
+/* ===== modal ===== */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,5,4,.72);backdrop-filter:blur(8px)}
+#startMenuModal{display:flex;z-index:2000}#profileModal{z-index:2500}#helpModal{z-index:3000}#meldPromptModal{z-index:4000}
+.modal>div,#ov{position:relative;width:min(92vw,460px);max-height:88vh;overflow:auto;padding:26px;border-radius:22px;background:linear-gradient(160deg,#2b1f19,#16100d);border:1px solid var(--line);box-shadow:0 24px 60px rgba(0,0,0,.6);text-align:center;animation:pin .35s cubic-bezier(.2,1.3,.4,1)}
+.modal h1{margin:0 0 8px;font-size:30px;color:var(--gold)}
+.modal h2,.modal h3{margin:0 0 12px;color:var(--gold)}
+.modal p{color:var(--mut);line-height:1.55;font-size:14px}
+.modal ul,.modal ol{padding-left:20px;line-height:1.6;font-size:14px;color:var(--tx);text-align:left}
+#helpModal>div{width:min(92vw,600px);text-align:left}#helpModal b{color:var(--ok)}
+.modal button{width:100%;margin-top:12px}
+#startGameBtn,#gotItBtn,#meldYesBtn,#profStartBtn{background:var(--ok);color:#06240f}
+#menuHelpBtn,#meldNoBtn,#profBackBtn,#avUpBtn{background:rgba(255,255,255,.1);border:1px solid var(--line)}
+#closeHelp{position:absolute;top:10px;right:12px;width:auto!important;margin:0!important;padding:2px 10px;background:none;box-shadow:none;font-size:22px;color:var(--mut)}
+#meldPromptModal>div>div{display:flex;gap:12px}#meldPromptModal button{margin-top:6px}
+.opt{margin-top:14px;text-align:left}
+.opt>span{font-size:12px;color:var(--mut);font-weight:700;letter-spacing:.5px}
+.seg{display:flex;gap:6px;margin-top:6px}
+.modal .seg button{width:auto;flex:1;margin:0;padding:9px 6px;background:rgba(255,255,255,.08);border:1px solid var(--line);box-shadow:none;font-size:14px}
+.modal .seg button.sel{background:var(--gold);color:#2a1d00;border-color:transparent}
+#nameInput{width:100%;margin-top:6px;padding:11px 14px;font:inherit;font-size:16px;color:var(--tx);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:12px;outline:none}
+#nameInput:focus{border-color:var(--gold)}
+#avGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+#avGrid button{margin:0;width:auto;padding:0;aspect-ratio:1;font-size:24px;background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:50%;box-shadow:none}
+#avGrid button.sel{border-color:var(--gold);background:rgba(255,200,61,.2)}
+.avrow{display:flex;align-items:center;gap:10px;margin-top:10px}
+.avrow button{margin:0;flex:1;padding:9px}
+.avprev{flex:none;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:32px;background:#42a5f5;overflow:hidden;border:3px solid var(--gold)}
+.avprev img{width:100%;height:100%;object-fit:cover}
+/* ===== papan skor akhir ronde ===== */
+#ov{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1500;border-color:var(--gold)}
+#ov>b{display:block;font-size:22px;color:var(--gold);margin-bottom:6px}
+#ov .sub{color:var(--ok);font-size:13px;margin-bottom:8px}
+#ov table{width:100%;border-collapse:collapse;margin:8px 0}
+#ov td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+#ov td:first-child{text-align:left;font-weight:700}
+#ov thead td{color:var(--mut);font-size:12px}
+#ov .val-g{color:var(--ok)}#ov .val-m{color:var(--bad)}#ov .val-t{color:var(--gold);font-weight:800}
+#ov button{background:var(--ok);color:#06240f;margin-top:12px;width:100%}
+/* ===== paksa landscape ===== */
+#rotate{display:none;position:fixed;inset:0;z-index:9000;background:#120e0c;color:var(--tx);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+.rot-ic{font-size:64px;animation:rot 2s ease-in-out infinite}
+@media (orientation:portrait) and (max-width:900px){#rotate{display:flex}}
+@media (max-height:520px){:root{--hh:52px;--fh:50px}.av{width:30px;height:30px;font-size:16px}#toolbar button{width:34px;height:34px}.modal>div,#ov{padding:16px}#actions button{padding:7px 12px}}
+@media (max-width:980px){.pl small{display:none}#log{width:210px}}
+@keyframes fl{from{opacity:0;transform:translate(-50%,0) scale(.5)}15%{opacity:1;transform:translate(-50%,-14px) scale(1.3)}to{opacity:0;transform:translate(-50%,-90px) scale(1)}}
+@keyframes pin{from{opacity:0;transform:scale(.88) translateY(14px)}}
+@keyframes ban{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+@keyframes flash{from{filter:brightness(1.8)}}
+@keyframes pulse{50%{transform:scale(1.06)}}
+@keyframes bob{50%{transform:translateY(-3px)}}
+@keyframes rot{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+
+/* ===== online: login, lobi, ruang ===== */
+.modal input{width:100%;margin-top:6px;padding:11px 14px;font:inherit;font-size:15px;color:var(--tx);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:12px;outline:none}
+.modal input:focus{border-color:var(--gold)}
+#authModal{z-index:2600}#lobbyModal{z-index:2600}#roomModal{z-index:2700}
+.err{min-height:18px;margin:8px 0 0;font-size:13px;color:var(--bad)!important}.err.ok{color:var(--ok)!important}
+.modal button.link{background:none;box-shadow:none;color:var(--gold);font-size:13px;padding:6px;margin-top:4px;text-decoration:underline}
+#lobbyModal>div{width:min(94vw,520px);text-align:left}
+#lobbyModal .hd{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+#lobbyModal .hd .avprev{width:46px;height:46px;font-size:24px}
+#lobbyModal .hd b{display:block;font-size:16px}#lobbyModal .hd small{color:var(--gold)}
+.lrow{display:flex;gap:8px;margin-top:6px}.lrow input{margin:0;flex:1}.lrow button{width:auto!important;margin:0!important;padding:10px 16px!important}
+#lbAv{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:8px}
+#lbAv button{margin:0;padding:0;aspect-ratio:1;font-size:15px;background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:50%;box-shadow:none;width:auto}
+#lbAv button.sel{border-color:var(--gold)}
+.sec{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.codebox{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0}
+.codebox b{font-size:34px;letter-spacing:6px;color:var(--gold);font-family:ui-monospace,monospace}
+.codebox button{width:auto!important;margin:0!important;padding:8px 12px!important;font-size:13px!important}
+.members{display:grid;gap:8px;margin:10px 0}
+.mem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);text-align:left}
+.mem.empty{opacity:.45;border-style:dashed}
+.mem .av{width:34px;height:34px;font-size:18px}
+.mem em{margin-left:auto;font-style:normal;font-size:11px;color:var(--gold)}
+.tmr{font-style:normal;color:var(--gold);font-size:11px;margin-left:4px;font-weight:800}
+#ov .tm{color:var(--mut);font-size:13px;margin-top:8px}

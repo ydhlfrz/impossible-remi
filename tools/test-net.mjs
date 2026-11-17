@@ -1,0 +1,30 @@
+import { Net } from '../src/net.js';
+import { handle } from '../server/handler.js';
+import { MemoryStore } from '../server/store.js';
+let n = 0, bad = 0;
+const ok = (name, got, want = true) => { n++; if (JSON.stringify(got) !== JSON.stringify(want)) { bad++; console.log('GAGAL:', name, JSON.stringify(got), JSON.stringify(want)); } };
+const ctx = { store: new MemoryStore(), env: { AUTH_SECRET: 's' }, now: () => Date.now(), cfg: { rules: {}, timers: {} } };
+const fetchFn = async (url, o) => {
+  const u = new URL(url, 'http://x');
+  const out = await handle({ method: o.method, path: u.pathname, query: Object.fromEntries(u.searchParams), body: o.body, headers: Object.fromEntries(Object.entries(o.headers || {}).map(([k, v]) => [k.toLowerCase(), v])), ip: '3.3.3.3' }, ctx);
+  return { ok: out.status < 400, status: out.status, json: async () => out.body };
+};
+const mem = () => { const m = new Map(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: k => m.delete(k) }; };
+const a = new Net({ fetchFn, storage: mem() });
+const u = await a.register('net_user1', 'password-net1', 'Neti');
+ok('register lewat SDK menyimpan token', [u.username, !!a.token, a.store.getItem('remiToken') === a.token], ['net_user1', true, true]);
+const a2 = new Net({ fetchFn, storage: a.store });
+ok('token dipulihkan dari penyimpanan', (await a2.me()).username, 'net_user1');
+let err = null; try { await new Net({ fetchFn, storage: mem() }).me(); } catch (e) { err = e; }
+ok('tanpa token -> error 401 yang terstruktur', [err && err.status, err && err.code], [401, 'unauthorized']);
+const r = await a.createRoom({ target: 300, password: 'abcd' });
+await a.startRoom(r.code);
+const updates = []; const h = a.poll(r.code, p => updates.push(p), { fast: 10, slow: 10 });
+await new Promise(res => setTimeout(res, 120)); h.stop();
+ok('polling menerima pembaruan berulang', updates.length >= 3 && updates.every(p => p.view));
+const before = updates.length; await new Promise(res => setTimeout(res, 60));
+ok('stop() menghentikan polling', updates.length - before <= 1);
+const seat = updates[0].seat, view = updates[0].view;
+if (view.cur === seat && view.phase === 'draw') { const ar = await a.action(r.code, { type: 'draw' }); ok('aksi lewat SDK', ar.ok); } else ok('aksi lewat SDK (bukan giliran: dilewati)', true);
+console.log(`${n - bad}/${n} tes SDK lulus`);
+process.exit(bad ? 1 : 0);
