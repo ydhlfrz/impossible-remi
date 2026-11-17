@@ -3,7 +3,7 @@ export function makeNotifier(env, fetchFn = globalThis.fetch) {
   const url = env.SUPABASE_URL, key = env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return null;
   return async (code, v) => {
-    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 1500);
+    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 700);
     try {
       await fetchFn(url.replace(/\/+$/, '') + '/realtime/v1/api/broadcast', {
         method: 'POST', signal: ctrl.signal,

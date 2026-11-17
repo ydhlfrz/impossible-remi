@@ -56,7 +56,7 @@ export class Net {
 
 // Klien satu ruang: sync digerakkan notifikasi push (Supabase Realtime) + pewaktu batas waktu giliran + polling cadangan.
 export class RoomClient {
-  constructor({ net, code, onUpdate, realtime, pollMs = 1200, fallbackMs = 6000, fastMs = 800, backoffMs = 1000 }) {
+  constructor({ net, code, onUpdate, realtime, pollMs = 1200, fallbackMs = 1500, fastMs = 800, backoffMs = 1000 }) {
     Object.assign(this, { net, code, onUpdate, realtime, pollMs, fallbackMs, fastMs, backoffMs });
     this.alive = false; this.since = 0; this.handled = 0; this.busy = false; this.again = false; this.fails = 0; this.live = false; this.timer = null; this.ch = null;
   }
